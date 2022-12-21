@@ -22,7 +22,7 @@ x_true = np.arange(0,1.01,0.01)
 y_true = ground_truth(x_true)
 
 # Equidistant noisy samples as training data
-N = 3  # Datapoints
+N = 20  # Datapoints
 x_train = np.arange(0,1+1/N,1/N)
 #x_train = np.array([0.2,0.4,0.6,0.8])
 y_train = ground_truth(x_train)
@@ -57,20 +57,23 @@ plt.title('Ridge Regression')
 
 # %% Bayesian Regression
 # Hyperparameters
-alpha = 2e-3    # Precision of prior, approaches uniform distribution for alpha -> 0
-beta = 2      # Precision of likelihood (inverse variance of target parameter)
+alpha = 0.5    # Precision of prior, approaches uniform distribution for alpha -> 0
+beta = 5      # Precision of likelihood (inverse variance of target parameter)
 
 bayes = BayesianRegression(alpha=alpha, beta=beta)
 w_mean, w_cov = bayes.fit(Phi,y_train)
 
 # %% Plot of training data and ground truth for bayesian regression
 #y_bayes,y_std = bayes.predict(rf.transform_features_poly(x_true,d), return_std=True)
-y_bayes,y_std = bayes.predict(rf.transform_features_gauss(x_true,std=std_basis, num=num), return_std=True)
+Phi_gauss = rf.transform_features_gauss(x_true,std=std_basis, num=num)
+y_bayes,y_std = bayes.predict(Phi_gauss, return_std=True)
+y_bayes_samples = bayes.predict_samples(Phi_gauss,5)
 
 plt.plot(x_true,y_true,'k',label='Ground Truth')
 plt.plot(x_train,y_train,linestyle='none',color='b',ms=7,marker='o',label='Training Data')
 plt.plot(x_true,y_bayes,'r',label='Model Mean (MAP)')
 plt.fill_between(x_true, y_bayes - y_std, y_bayes + y_std, color="pink", label="std.")
+#plt.plot(x_true,y_bayes_samples,'b',label='Samples')
 plt.ylim([-1.2,1.2])
 plt.legend()
 plt.title('Bayesian Regression')
